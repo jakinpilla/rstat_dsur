@@ -482,4 +482,47 @@ pictureData %>% colnames()
 
 #' relationship_status : 연애상태
 #' 
-#' alone : 3주 동안 자신만 나온 사진을 올렸을때 남자의 친구 요청 횟수수
+#' couple : 3주 동안 어떤 남자와 같이 찍은 사진을 올렸을 때 남자의 친구 요청 횟수
+#' 
+#' alone : 3주 동안 자신만 나온 사진을 올렸을때 남자의 친구 요청 횟수
+#' 
+#' 
+pictureData %>% head
+
+#' 강건한 함수는 넓은 형식을 요구
+#' 
+pictureData$row <- c(1:17, 1:23)
+
+profileMelt <- melt(pictureData, 
+                    id = c('case', 'row', 'relationship_status'), 
+                    measured = c('couple', 'alone'))
+
+
+names(profileMelt) <- c('case', 'row', 'relationship_status', 'profile_picture',
+                        'friend_requests')
+
+
+profileData <- dcast(profileMelt, 
+                    row ~ relationship_status + profile_picture, 
+                    value = 'friend_requests')
+
+profileData$row <- NULL
+
+profileData
+
+#' tsplit() : 절사평균에 기초하여 이원 혼합 분산분석 시행
+
+tsplit(2, 2, profileData)
+
+#' sppba() : 이원 혼합 설계의 요인 A의 주효과를 M 추정량과 부트스트랩을 이용하여 계산
+
+sppba(2, 2, profileData, est = mom, nboot = 2000)
+
+#' sppbb() : 이 함수는 이원 혼합 설계의 요인 B의 주효과를 M 추정량과 부트스트랩을 
+#' 이용해서 계산
+#' 
+sppbb(2, 2, profileData, est = mom, nboot = 2000)
+
+#' sppbi() : 이 함수는 이원 혼합 설계의 요인 A\*B의 주효과를 M 추정량과 부트스트랩을 이용해서 계산
+#' 
+sppbi(2, 2, profileData, est = mom, nboot = 2000)

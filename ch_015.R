@@ -249,6 +249,7 @@ ecstasyModel <- wilcox.test(ecstasyData$wedsBDI, ecstasyData$sundayBDI, paried =
 ecstasyModel
 
 #' #### 윌콕슨 부호순위 검정 결과의 해석
+#'
 #' 
 #' 중앙값들에 근거할 때,
 #' 
@@ -304,3 +305,83 @@ rFromWilcox(ecstasyModel, 20)
 #' 
 #' #### 자료 입력과 잠정 분석
 #' 
+soyaData <- read.delim("Soya.dat", header = T)
+soyaData %>% str()
+#' 대조군(콩 식사 없음)을 요인의 첫 수준으로 삼는 것이 좋다. 앞에서 자료를 직접 입력할 때는 그렇게 했지만, 지금은 그렇지 않다. 순서를 다음과 같이 바꾼다.
+#' 
+
+soyaData %>%
+  mutate(Soya = case_when(
+    Soya == 1 ~ 'No Soya',
+    Soya == 2 ~ '1 Soya Meals',
+    Soya == 3 ~ '4 Soya Meals',
+    Soya == 4 ~ '7 Soya Meals'
+  )) -> soyaData
+
+soyaData$Soya <- factor(soyaData$Soya, 
+                        levels = c('No Soya', '1 Soya Meals', '4 Soya Meals', '7 Soya Meals'))
+soyaData %>% str()
+soyaData$Soya
+
+#' 분포의 정규성 검정 결과를 살펴보자. 
+by(soyaData$Sperm, soyaData$Soya, stat.desc, basic=FALSE, norm=TRUE)
+
+#' 콩을 먹지 않은 그룹은 $W(20) = .805, p = .001$, 매주 1회 그룹은 $W(20) = .826, p = .002$, 
+#' 매주 4회 그룹은 $W(20) = .826, p = .002$, 매주 4회 그룹은 $W(20) = .743, p < .001$로 유의하다.
+#' 즉, 정규분포로부터 벗어나 있다.
+#' 
+leveneTest(soyaData$Sperm, soyaData$Soya)
+
+#' $F(3, 76) = 2.86, p = .042$ 동질성 가정이 위반되었다.
+#' 
+#' #### R을 이용한 크러스컬-윌리스 검정 실행
+#' 
+kruskal.test(Sperm ~ Soya, data = soyaData)
+
+
+#' 각 그룹의 평균 순위를 구해 구면 크러스컬-윌리스 검정을 해석하는데 도움이 된다. 
+#' 
+#' 
+soyaData$Ranks <- rank(soyaData$Sperm)
+
+
+by(soyaData$Ranks, soyaData$Soya, mean)
+
+soyaData %>%
+  group_by(Soya) %>%
+  summarise(mean_sperm  = mean(Sperm))
+
+
+soyaData %>%
+  ggplot(aes(Soya, Sperm)) +
+  geom_boxplot()
+
+#' #### 크러스컬-윌리스 검정을 위한 사후검정
+#'
+#' 비모수적 사후 검정을 수행하는 한 가지 방법은 모든 가능한 비교에 대해 윌콕슨 순위합 검정을 수행하는 것이다. 이 방법은 서로 다른 그룹의 평균 순위와의 차이를 어떤 임계값과 비교하는 것이다.  그 임계값은 z 점수(수행하는 비교 횟수에 맞게 수정된)와 전체 표본 크기, 그리고 비교하는 두 그룹의 표본 크기에 기초한 상수로 계산한다. 
+#' 
+#' $$ |\overline{R}_{u}} - \overline{R}_{v}| \ge $$
+#' 
+#' 
+#' $$ z_{\alpha/k(k-1)} \sqrt{ \frac{N(N + 1)}{12} \left( \frac{1}{n_{u}} + \frac{1}{n_{v}} \right)} $$
+#' 
+#' $|\overline{R}_{u}} - \overline{R}_{v}|$은 그냥 비교하는 두 그룹의 평균 순위 차이의 크기이다. 
+#' 
+#' 우변에서 k는 그룹의 수이고, N은 전체표본크기이다. $n_{u}$는 비교하는 첫 그룹의 참가자 수이고 $n_{v}$는 둘째 그룹의 참가자 수이다.
+#' 
+#' $\alpha$는 통상 0.05이고 그룹의 수 k는 4이므로   $\alpha/k(k-1) = 0.05 / 4(4-1) = .00417$ 이다.
+#' 
+#' $z_{.00417}$의 의미는 모든 z중 자신보다 큰 값의 비율이 .00417인 z 값의 의미이므로 정규분포 확률표를 참고하면 2.64를 근사값으로 얻을 수 있다.
+#' 
+#' 만일 두 그룹의 평균 순위 차이의 크기가 임계 차이보다 크면, 두 그룹의 차이는 유의한 것이다. 
+#' 
+#' 이 모든 계산을 해 주는 `kruskalmc()` 함수를 이용한다. 
+#' 
+library(pgirmess)
+kruskalmc(Sperm ~ Soya, data = soyaData)
+
+#' 결과 중 difference 열이 TRUE이면 차이가 유의한 것이고, FALSE이면 유의하지 않은 것이다.
+#' 
+#' 결과적으로 지금 예제에서는 모든 차이가 임계 차이보다 작으므로, 그 열이 모두 FALSE이고 즉 모든 차이가 유의하지 않은 것이 되었다.
+#' 
+#' 하지만 이처럼 모든 그룹을 다른 모든 그룹과 비교할 때는 차이들의 유의성이 너무 엄격하게 판정된다. 그렇지 않으면 제1종 오류율이 상승하기 때문이다. 특정 그룹들만 집중해서 비교한다면 이러한 문제점을 완화할 수 있다.

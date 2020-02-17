@@ -9,8 +9,34 @@
 #' ---
 
 
+#' 종속변수들의 관계: 교차곱
+#' 
+#' 세가지 교차곱: 총교차곱, 모형교차곱, 잔차교차곱...
+#' 
+#' 총교차곱
+#' 
+#' $$ CP_{T} = \sum_{i=1}^{n} \left( x_{i(Actions)} - \overline{X}_{total(Actions)} \right) \left( x_{i(Thoughts)} - \overline{X}_{total(Thoughts)} \right)$$
 
-#' #### 크러스컬-윌리스 검정을 위한 사후검정
-#'
+#' 
+#' $$ CP_{M} = \sum_{grp=1}^{k} n \left[ \left( \overline{x}_{grp(Actions)} - \overline{X}_{total(Actions)}} \right) \left( \overline{x}_{grp(Thoughts)} - \overline{X}_{total(Thoughts)}} \right) \right] $$
+#' 
 
-#' $$ F_{r} = \left[ \frac{12}{Nk(k+1)}  \sum_{i = 1}^{k} R^2 _{i} \right] - 3N(k+1) $$
+#' $$ CP_{R} = \sum_{i=1}^{n} \left( x_{i(Actions)} - \overline{X}_{grp(Actions)} \right) \left( x_{i(Thoughts)} - \overline{X}_{grp(Thoughts)} \right)$$
+#' 
+#' 
+#' 
+#' #### 총 SSCP 행렬(T)
+#' 
+#' |   |  열 1 Actions | 열 2 Thoughts   |
+#' |:----:|:----:|:----:|
+#' | 행 1 Actions | $SS_{Actions}$ | $CP_{T}$ |
+#' | 행 2 Thoughts | $CP_{T}$ | $SS_{Thoughts}$ |
+#' 
+#' 
+#' $$ T  = \begin{pmatrix} 61.47 & 5.44\\
+#' 5.44 & 141.47
+#' \end{pmatrix}$$
+#' 
+#' 
+
+

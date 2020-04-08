@@ -1,7 +1,7 @@
 ch015(비모수적 검정)
 ================
 jakinpilla
-2020-02-14
+2020-03-12
 
   - [총 SSCP 행렬(T)](#총-sscp-행렬t)
 
@@ -48,91 +48,12 @@ jakinpilla
 5.44 & 141.47
 \\end{pmatrix}")  
 
-``` r
-library(tidyverse)
-```
+  
+![\\chi^{2} =
+\\frac{O}{M}](https://latex.codecogs.com/png.latex?%5Cchi%5E%7B2%7D%20%3D%20%5Cfrac%7BO%7D%7BM%7D
+"\\chi^{2} = \\frac{O}{M}")  
 
-    ## Warning: package 'ggplot2' was built under R version 3.5.3
-
-    ## Warning: package 'tibble' was built under R version 3.5.3
-
-    ## Warning: package 'tidyr' was built under R version 3.5.3
-
-    ## Warning: package 'purrr' was built under R version 3.5.3
-
-    ## Warning: package 'dplyr' was built under R version 3.5.3
-
-    ## Warning: package 'stringr' was built under R version 3.5.3
-
-    ## Warning: package 'forcats' was built under R version 3.5.3
-
-``` r
-sleep
-```
-
-    ##    extra group ID
-    ## 1    0.7     1  1
-    ## 2   -1.6     1  2
-    ## 3   -0.2     1  3
-    ## 4   -1.2     1  4
-    ## 5   -0.1     1  5
-    ## 6    3.4     1  6
-    ## 7    3.7     1  7
-    ## 8    0.8     1  8
-    ## 9    0.0     1  9
-    ## 10   2.0     1 10
-    ## 11   1.9     2  1
-    ## 12   0.8     2  2
-    ## 13   1.1     2  3
-    ## 14   0.1     2  4
-    ## 15  -0.1     2  5
-    ## 16   4.4     2  6
-    ## 17   5.5     2  7
-    ## 18   1.6     2  8
-    ## 19   4.6     2  9
-    ## 20   3.4     2 10
-
-``` r
-sleep %>%
-  filter(group == 1) %>%
-  select(extra) %>% pull() -> y
-
-summary(y)
-```
-
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##  -1.600  -0.175   0.350   0.750   1.700   3.700
-
-``` r
-sd(y)
-```
-
-    ## [1] 1.78901
-
-``` r
-par(mfrow=c(2, 2))
-hist(y)
-boxplot(y)
-qqnorm(y); qqline(y)
-hist(y, prob = T); lines(density(y), lty = 2)
-```
-
-![](ch_015_appended_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
-
-``` r
-par(mfrow=c(1, 1))
-
-t.test(y)
-```
-
-    ## 
-    ##  One Sample t-test
-    ## 
-    ## data:  y
-    ## t = 1.3257, df = 9, p-value = 0.2176
-    ## alternative hypothesis: true mean is not equal to 0
-    ## 95 percent confidence interval:
-    ##  -0.5297804  2.0297804
-    ## sample estimates:
-    ## mean of x 
-    ##      0.75
+  
+![ln(O\_{food and then dance}) = b\_{0} + b\_{1}
+\\times 0](https://latex.codecogs.com/png.latex?ln%28O_%7Bfood%20and%20then%20dance%7D%29%20%3D%20b_%7B0%7D%20%2B%20b_%7B1%7D%20%5Ctimes%200
+"ln(O_{food and then dance}) = b_{0} + b_{1} \\times 0")

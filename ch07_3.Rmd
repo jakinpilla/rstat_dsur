@@ -1,0 +1,123 @@
+---
+title: "ch07_3"
+author: "Daniel_Kim"
+date: '2020 4 1 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message = FALSE, warning = FALSE}
+library(ez)
+library(ggplot2)
+library(nlme)
+library(pastecs)
+library(reshape2)
+library(WRS)
+library(clinfun)
+library(pgirmess)
+library(car)
+library(tidyverse)
+# install.packages('mvoutlier')
+library(mvoutlier)
+library(gmodels)
+library(MASS)
+library(nlme) # 다층모형을 위해
+library(QuantPsyc)
+library(boot)
+```
+
+<br>
+
+##### 7.8.2.2 R을 이용한 다중회귀: 기본모형
+
+```{r}
+album2 <- read.delim('Album Sales 2.dat', header = T)
+
+album2 %>% head
+```
+
+
+- 첫 모형은 $adverts$ 하나만 예측변수로 사용하고 둘째 모형은 $adverts$와 $airplay$, $attract$를 예측변수로 사용한다.
+
+```{r}
+album_sales_2 <- lm(sales ~ adverts, data = album2)
+```
+
+```{r}
+album_sales_3 <- lm(sales ~ adverts + airplay + attract, data = album2)
+```
+
+#### 7.8.3 기본 다중회귀의 해석
+
+##### 7.8.3.1 모형 요약
+
+```{r}
+album_sales_2 %>% summary()
+```
+
+
+
+```{r}
+album_sales_3 %>% summary()
+```
+
+
+- $Adjusted R-squared$와 $R-squared$ 값의 차이는 .5%이다. 따라서 이 모형은 교차 타당성이 아주 좋다고 할 수 있다.
+
+<br>
+
+##### 7.8.3.2 모형 매개변수
+
+$$판매량_{i} = b_{0} + b_{1} 광고비_{i} + b_{2} 방송횟수_{i} + b_{3} 매력_{i}$$
+
+$$판매량_{i} = -26.61 + .08\ 광고비_{i} + 3.27 \ 방송횟수_{i} + 11.09 \  매력_{i}$$
+
+- 출력에는 각 $b$ 값에 연관된 표준오차($Std.Error$)도 나와 있다. 표준오차는 서로 다른 표본들에 대해 $b$갑이 얼마나 달라지는지를 나타낸다. 이 표준오차는 $b$ 값이 0과 유의하게 다른지 판정하는데 쓰인다. $b$값이 0과 유의하게 다른지는 $t$ 통계량을 이용해서 검증할 수 있다.
+
+- $b$값을 표준화한 버전이 더 쉽다. 이를 구하려면 `QuantPsyc::lm.beta()`함수를 이용한다. 
+
+```{r}
+library(QuantPsyc)
+lm.beta(album_sales_3)
+```
+
+- 이들은 모형의 한 예측변수의 중요도를 잘 비교해서 나타낸다. 
+
+```{r}
+album2$sales %>% sd()
+```
+
+```{r}
+album2$adverts %>% sd()
+```
+
+```{r}
+album2$airplay %>% sd()
+```
+
+```{r}
+album2$attract %>% sd()
+```
+
+ - 광고비($\beta = .511$): 광고비가 1 표준편차(485.655)만큼 증가하면 음반 판매량이 .511 표준편차만큼 증가함을 의미한다. 음반판매량의 표준편차는 80.699이므로, 증가량은  `r .511*80.699`이다. 즉, 광고비를 485.655 더 쓰면 음반이 41.240장 더 팔린다고 기대할 수 있다.
+
+ - 방송 횟수($\beta = .512$): 라디오 방송 횟수가 1 표준편차 12.27회 만큼 증가하면 음반 판매량이 .512 표준편차만큼 증가함을 의미한다. `r .512*80.699` 만큼 증가한다.
+따라서, 출시 전 한 주 동안 라디오 1이 음반의 노래를 12.27번 더 틀어줄 때마다 앨범이 41.318더 팔린다고 기대할 수 있다.
+
+ - 밴드 매력($\beta = .192$): 밴드 매력 점수가 1 표준편차(1.40)만큼 증가하면 음반 판매량이 .192 표준편차만큼 증가함을 의미한다. `r .192*80.699` 만큼 증가한다. 따라서 매력이 1.40 높은 밴드의 음반이 15.49장 더 팔릴 것이라고 기대할 수 있다.
+
+ - 표준화되지 않은 베타 값들의 95% 신뢰구간들은 그러한 표본들의 95%에서 $b$의 참 값이 해당 구간의 상, 하계 사이에 속하도록 만들어진 것이다. 다른 말로 하면, 100개의 표본에 대해 $b$의 신뢰구간들을 구했다면 그 중 95%의 신뢰구간에는 $b$의 참값이 포함된다.
+
+ - 신뢰구간이 좁다는 것은 해당 표본의 $b$값이 모집단의 $b$의 참값에 가깝다는 것이다.
+
+#### 7.8.4 모형의 비교
+
+ - 위계적 회귀분석에서는 두 모형의 적합도를 비교해야 한다. 둘째 모형의 $R^{2}$이 첫 모형의  $R^{2}$보다 유의하게 큰 지 판단해야 한다.
+
+$$F = \frac{(N-k-1)R^{2}}{k(1-R^{2})}$$
+
+- 첫 모형의 $R^{2}$은 .335이다. 
+

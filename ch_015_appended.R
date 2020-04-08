@@ -38,5 +38,7 @@
 #' \end{pmatrix}$$
 #' 
 #' 
-
+#' $$\chi^{2} = \frac{O}{M}$$
+#' 
+#' $$ln(O_{food and then dance}) = b_{0} + b_{1} \times 0$$
 
